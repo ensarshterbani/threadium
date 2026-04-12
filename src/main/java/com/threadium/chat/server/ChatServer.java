@@ -91,6 +91,20 @@ public class ChatServer {
         }
     }
 
+    public void deleteRoom(String roomName) {
+        roomLock.lock();
+        try {
+            ChatRoom room = activeRooms.remove(roomName);
+            if (room != null) {
+                room.shutdown();
+                System.out.println("Room deleted (empty): " + roomName);
+            }
+            broadcastRoomListUpdate();
+        } finally {
+            roomLock.unlock();
+        }
+    }
+
     public void anchorUserToRoom(String username, String roomName) {
         userToRoom.put(username, roomName);
     }

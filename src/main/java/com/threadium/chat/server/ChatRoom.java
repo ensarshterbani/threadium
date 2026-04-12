@@ -53,12 +53,22 @@ public class ChatRoom {
     }
 
     public void removeMember(String username) {
+        boolean isEmpty = false;
         lock.lock();
         try {
             memberUsernames.remove(username);
+            isEmpty = memberUsernames.isEmpty();
         } finally {
             lock.unlock();
         }
+
+        if (isEmpty) {
+            server.deleteRoom(this.name);
+        }
+    }
+
+    public void shutdown() {
+        workerThread.interrupt();
     }
 
     public void broadcastMessage(Message message) {
