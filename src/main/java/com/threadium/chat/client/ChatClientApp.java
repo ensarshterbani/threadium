@@ -126,11 +126,7 @@ public class ChatClientApp extends Application implements ServerConnection.Messa
                 return;
             }
 
-            if (connection.connect("localhost", 8080)) {
-                connection.sendRegister(u, p1);
-            } else {
-                showAlert("Connection Error", "Cannot connect to server on localhost:8080");
-            }
+            showServerConnectionWindow(u, p1, false);
         });
 
         Hyperlink backToLogin = new Hyperlink("Back to Login");
@@ -180,7 +176,8 @@ public class ChatClientApp extends Application implements ServerConnection.Messa
             String portStr = portField.getText().trim();
             int port = 8080;
             try {
-                if (!portStr.isEmpty()) port = Integer.parseInt(portStr);
+                if (!portStr.isEmpty())
+                    port = Integer.parseInt(portStr);
             } catch (NumberFormatException ex) {
                 showAlert("Invalid Port", "Please enter a valid port number.");
                 return;
