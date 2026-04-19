@@ -126,7 +126,11 @@ public class ChatClientApp extends Application implements ServerConnection.Messa
                 return;
             }
 
-            showServerConnectionWindow(u, p1, false);
+            if (connection.connect("localhost", 8080)) {
+                connection.sendRegister(u, p1);
+            } else {
+                showAlert("Connection Error", "Cannot connect to server on localhost:8080");
+            }
         });
 
         Hyperlink backToLogin = new Hyperlink("Back to Login");
