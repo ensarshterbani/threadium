@@ -72,12 +72,10 @@ public class ChatClientApp extends Application implements ServerConnection.Messa
             String u = usernameField.getText().trim();
             String p = passwordField.getText();
             if (!u.isEmpty() && !p.isEmpty()) {
-                if (connection.connect("localhost", 8080)) {
-                    loggedInUsername = u;
-                    connection.sendLogin(u, p);
-                } else {
-                    showAlert("Connection Error", "Cannot connect to server on localhost:8080");
-                }
+                loggedInUsername = u;
+                showServerConnectionWindow(u, p, true);
+            } else {
+                showAlert("Error", "Please enter both username and password.");
             }
         });
 
@@ -128,11 +126,7 @@ public class ChatClientApp extends Application implements ServerConnection.Messa
                 return;
             }
 
-            if (connection.connect("localhost", 8080)) {
-                connection.sendRegister(u, p1);
-            } else {
-                showAlert("Connection Error", "Cannot connect to server on localhost:8080");
-            }
+            showServerConnectionWindow(u, p1, false);
         });
 
         Hyperlink backToLogin = new Hyperlink("Back to Login");
@@ -145,6 +139,69 @@ public class ChatClientApp extends Application implements ServerConnection.Messa
 
         vbox.getChildren().addAll(title, usernameField, passField1, passField2, registerBtn, backToLogin);
         registerScene = new Scene(vbox, 500, 350);
+
+    }
+
+    private void showServerConnectionWindow(String u, String p, boolean isLogin) {
+        Stage stage = new Stage();
+        stage.setTitle("Connect to Server");
+
+        VBox vbox = new VBox(15);
+        vbox.setPadding(new Insets(20));
+        vbox.setAlignment(Pos.CENTER);
+
+        Label title = new Label("Server Connection");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        ToggleGroup group = new ToggleGroup();
+        RadioButton localRb = new RadioButton("Localhost");
+        localRb.setToggleGroup(group);
+        localRb.setSelected(true);
+
+        RadioButton remoteRb = new RadioButton("Other Address (IPv4)");
+        remoteRb.setToggleGroup(group);
+
+        TextField ipField = new TextField("localhost");
+        ipField.setPromptText("Enter IPv4 Address");
+        ipField.disableProperty().bind(localRb.selectedProperty());
+
+        TextField portField = new TextField("8080");
+        portField.setPromptText("Enter Port (default 8080)");
+
+        Button connectBtn = new Button("Connect");
+        connectBtn.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        connectBtn.setOnAction(e -> {
+            String host = localRb.isSelected() ? "localhost" : ipField.getText().trim();
+            String portStr = portField.getText().trim();
+            int port = 8080;
+            try {
+                if (!portStr.isEmpty()) port = Integer.parseInt(portStr);
+            } catch (NumberFormatException ex) {
+                showAlert("Invalid Port", "Please enter a valid port number.");
+                return;
+            }
+
+            if (host.isEmpty()) {
+                showAlert("Invalid Host", "Please enter a host address.");
+                return;
+            }
+
+            if (connection.connect(host, port)) {
+                if (isLogin) {
+                    connection.sendLogin(u, p);
+                } else {
+                    connection.sendRegister(u, p);
+                }
+                stage.close();
+            } else {
+                showAlert("Connection Error", "Cannot connect to server at " + host + ":" + port);
+            }
+        });
+
+        vbox.getChildren().addAll(title, localRb, remoteRb, ipField, new Label("Port:"), portField, connectBtn);
+        stage.setScene(new Scene(vbox, 350, 400));
+        stage.show();
     }
 
     private void initChatScene() {
