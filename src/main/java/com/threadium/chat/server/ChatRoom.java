@@ -52,7 +52,7 @@ public class ChatRoom {
         }
     }
 
-    public void removeMember(String username) {
+    public void removeMember(String username, boolean deleteIfEmpty) {
         boolean isEmpty = false;
         lock.lock();
         try {
@@ -62,7 +62,7 @@ public class ChatRoom {
             lock.unlock();
         }
 
-        if (isEmpty) {
+        if (isEmpty && deleteIfEmpty) {
             server.deleteRoom(this.name);
         }
     }

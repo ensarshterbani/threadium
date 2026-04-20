@@ -51,7 +51,7 @@ public class ClientHandler implements Runnable {
                 handleJoinRoom(message);
                 break;
             case LEAVE_ROOM:
-                handleLeaveRoom();
+                handleLeaveRoom(true);
                 break;
             case ROOM_MESSAGE:
                 handleRoomMessage(message);
@@ -84,7 +84,7 @@ public class ClientHandler implements Runnable {
             String currentRoomName = server.getUserRoom(reqUsername);
             if (currentRoomName != null) {
                 ChatRoom room = server.getOrCreateRoom(currentRoomName);
-                room.removeMember(reqUsername);
+                room.removeMember(reqUsername, true);
                 server.unanchorUserFromRoom(reqUsername);
                 Message offlineMsg = new Message(MessageType.ROOM_MESSAGE, "System", null, reqUsername + " went offline.", room.getName(), LocalDateTime.now());
                 room.broadcastMessage(offlineMsg);
@@ -126,7 +126,7 @@ public class ClientHandler implements Runnable {
     private void handleJoinRoom(Message message) {
         String targetRoomName = message.getRoomName();
         if (targetRoomName != null && !targetRoomName.trim().isEmpty()) {
-            handleLeaveRoom(); // leave current explicit room first if any
+            handleLeaveRoom(false); // leave current explicit room first if any
             
             ChatRoom room = server.getOrCreateRoom(targetRoomName);
             room.addMember(username);
@@ -138,13 +138,14 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    private void handleLeaveRoom() {
+    private void handleLeaveRoom(boolean explicit) {
         String currentRoomName = server.getUserRoom(username);
         if (currentRoomName != null) {
             ChatRoom room = server.getOrCreateRoom(currentRoomName);
-            room.removeMember(username);
+            room.removeMember(username, explicit);
             server.unanchorUserFromRoom(username);
-            Message leaveMsg = new Message(MessageType.ROOM_MESSAGE, "System", null, username + " has explicitly left the room.", room.getName(), LocalDateTime.now());
+            String text = explicit ? username + " has explicitly left the room." : username + " has left the room window.";
+            Message leaveMsg = new Message(MessageType.ROOM_MESSAGE, "System", null, text, room.getName(), LocalDateTime.now());
             room.broadcastMessage(leaveMsg);
         }
     }
