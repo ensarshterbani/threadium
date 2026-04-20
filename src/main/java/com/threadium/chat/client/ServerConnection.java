@@ -9,6 +9,12 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.time.LocalDateTime;
 
+/**
+ * Network facade for the JavaFX client application. It manages the Socket lifecycle and
+ * spawns a daemon background thread that continuously reads from the ObjectInputStream.
+ * Upon receiving a valid deserialized `Message`, it fires a synchronous callback interface  
+ * to notify listening UI components. 
+ */
 public class ServerConnection {
     private Socket socket;
     private ObjectOutputStream out;
@@ -42,6 +48,10 @@ public class ServerConnection {
         }
     }
 
+    /**
+     * Infinite loop executed by the daemon listener Thread.
+     * Blocks entirely on `in.readObject()` awaiting server push events.
+     */
     private void listenForMessages() {
         try {
             while (!Thread.currentThread().isInterrupted()) {

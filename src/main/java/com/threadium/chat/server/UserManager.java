@@ -5,8 +5,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Lightweight authentication management utilizing serialized Map storage.
+ * Synchronizes file reads and writes heavily using a ReentrantLock ensuring no
+ * credential data is corrupted during parallel login/registration attempts.
+ */
 public class UserManager {
-    private final File dataFile = new File("users.dat");
+    private final File dataFile = new File("users.dat"); // Binary file for retaining mapped users
     private final Map<String, String> credentials = new ConcurrentHashMap<>();
     private final ReentrantLock fileLock = new ReentrantLock();
 

@@ -9,6 +9,12 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.time.LocalDateTime;
 
+/**
+ * Executes a continuous read loop over an accepted Socket connection.
+ * Acts as the server-side representative for a singular client instance.
+ * It deserializes `Message` objects received sequentially, filters them by `MessageType`, 
+ * and interacts securely with `ChatServer` logic to push state updates outward.
+ */
 public class ClientHandler implements Runnable {
     private final Socket socket;
     private final ChatServer server;
@@ -39,6 +45,9 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    /**
+     * Primary dispatcher linking abstract network intents to concrete private handler methods.
+     */
     private void handleMessage(Message message) {
         switch (message.getType()) {
             case REGISTER:

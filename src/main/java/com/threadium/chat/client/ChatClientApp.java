@@ -13,6 +13,13 @@ import javafx.stage.Stage;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+/**
+ * Main graphical client launcher utilizing JavaFX for the User Interface.
+ * Assembles and swaps UI Scenes (Login, Registration, dynamic Chat interface) based 
+ * on interaction and asynchronous alerts. Integrates an instance of ServerConnection, 
+ * pushing asynchronous network callbacks onto the primary GUI rendering thread queue safely
+ * using Platform.runLater().
+ */
 public class ChatClientApp extends Application implements ServerConnection.MessageListener {
 
     private ServerConnection connection;
@@ -372,6 +379,11 @@ public class ChatClientApp extends Application implements ServerConnection.Messa
         }
     }
 
+    /**
+     * Required callback override enforced by ServerConnection.MessageListener.
+     * Fires whenever the daemon background thread reads a valid Message from the server socket.
+     * MUST wrap all UI modification code traversing JavaFX nodes into Platform.runLater().
+     */
     @Override
     public void onMessageReceived(Message message) {
         Platform.runLater(() -> {

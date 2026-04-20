@@ -15,14 +15,23 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * The primary backend engine and entry point for the chat system.
+ * It initiates the ServerSocket to accept inbound network connections,
+ * spinning off independent ClientHandler threads via an ExecutorService.
+ * Maintains central, concurrent reference maps for users and room orchestration.
+ */
 public class ChatServer {
 
     private static final int PORT = 8080;
     
-    // Maps storing users and rooms, thread-safe access needed
+    // Maps storing users and rooms. We employ ConcurrentHashMap to accommodate 
+    // potentially simultaneous requests from thousands of client threads safely.
     private final Map<String, ClientHandler> activeUsers = new ConcurrentHashMap<>();
     private final Map<String, ChatRoom> activeRooms = new ConcurrentHashMap<>();
-    private final Map<String, String> userToRoom = new ConcurrentHashMap<>(); // persistent presence!
+    
+    // Tracks persistent presence (a user is "anchored" to a room even after disconnect)
+    private final Map<String, String> userToRoom = new ConcurrentHashMap<>();
     
     private final ReentrantLock userLock = new ReentrantLock();
     private final ReentrantLock roomLock = new ReentrantLock();

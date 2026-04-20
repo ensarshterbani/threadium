@@ -8,14 +8,20 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Represents an active chat room managed by the server. 
+ * Provides thread-safe interaction by utilizing ReentrantLocks for user membership 
+ * and a BlockingQueue mapped to a background worker thread for robust sequential 
+ * message broadcasting.
+ */
 public class ChatRoom {
-    private final String name;
-    private final ChatServer server;
-    private final List<String> memberUsernames;
-    private final BlockingQueue<Message> messageQueue;
-    private final List<Message> messageHistory;
-    private final ReentrantLock lock;
-    private final Thread workerThread;
+    private final String name;                       // The unique name of the room
+    private final ChatServer server;                 // Broad server context
+    private final List<String> memberUsernames;      // List of users currently viewing/listening to the room
+    private final BlockingQueue<Message> messageQueue; // Thread-safe queue absorbing rapid incoming messages
+    private final List<Message> messageHistory;      // Maintains historical context for late joiners
+    private final ReentrantLock lock;                // Ensures atomic operations over shared resources (members/history)
+    private final Thread workerThread;               // Independent background thread to dispatch messages
 
     public ChatRoom(String name, ChatServer server) {
         this.name = name;
@@ -37,10 +43,11 @@ public class ChatRoom {
     public void addMember(String username) {
         lock.lock();
         try {
+            // Only add them if not already present
             if (!memberUsernames.contains(username)) {
                 memberUsernames.add(username);
             }
-            // Send entire history to newly joined/reconnected member
+            // Rapidly flush the entire recorded history to newly joined/reconnected member
             ClientHandler handler = server.getActiveClient(username);
             if (handler != null) {
                 for (Message msg : messageHistory) {
@@ -80,6 +87,11 @@ public class ChatRoom {
         }
     }
 
+    /**
+     * The core loop for the worker thread dedicated to this chat room.
+     * Continuously waits (blocks) until a new message is placed into the queue,
+     * then retrieves it safely and pushes the message to all currently connected active members.
+     */
     private void processMessages() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
