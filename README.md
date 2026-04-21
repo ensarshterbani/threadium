@@ -10,7 +10,7 @@ The application relies on pure Java and JavaFX! It has been packaged into a stan
 1. **Load Project:** Open the `Threadium` folder in IntelliJ IDEA. If prompted, click **"Load Maven Project"** so IntelliJ can automatically install the JavaFX packages.
 2. **Start the Server:** Open `src/main/java/com/threadium/chat/server/ChatServer.java` and hit the green **Play** button on the `main` method. The server will bind to port `8080`.
 3. **Start the Clients:** Open `src/main/java/com/threadium/chat/client/ChatClientApp.java` and hit **Play**.
-    * *Note on playing with friends locally:* By default, the client connects to `localhost`. If you want to connect to a different computer on your WiFi, you must change `localhost` in the Java code to the target computer's IPv4 Address. 
+    * *Note on playing with friends locally:* When you log in or register via the app, a connection window will explicitly prompt you to choose between `Localhost` or connecting to a custom `IPv4 Address`. If you are hosting a server that friends on the same Wi-Fi want to connect to, they simply select `Other Address (IPv4)` and type in your host computer's IP! 
     * *Note on multiple clients:* By default, IntelliJ prevents running multiple identical application windows. To test multiple users simultaneously on your own computer, click the "Edit Configurations" dropdown next to your play button in the top right, go to "Modify Options", and check **"Allow multiple instances"**. Follow this up by clicking play 2 or 3 times to get several windows at once!
 
 ### Running via Terminal (Maven)
